@@ -1,7 +1,5 @@
 # React State Management
 
-Mettre des exemples codes
-
 Hypothèse de solution : reducer (useReducer) -> store (useContext) -> selector
 
 Problèmes classiques :
@@ -60,7 +58,7 @@ Ephemere vs persistent -> Qui contrôle le cycle de vie de l'état ? (ownership,
 
 L'objectif des stores n'est pas la persistence, mais de l'encapsuler dans un état éphémère.
 
-Solution finale : reducer (useReducer) -> store (useContext) -> subscribe (fine-grained ici !) -> selector
+Solution finale : reducer (action) -> store (external) -> provider (context) -> subscribe (fine-grained) -> selector
 
 Si context + selector suffisait, Zustand n'existerait pas.  
 Le vrai problème est la propagation des changements d'état, pas l'état lui même.
