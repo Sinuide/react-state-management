@@ -1,7 +1,8 @@
 import {
   createContext,
+  memo,
+  useCallback,
   useContext,
-  useEffect,
   useState,
   type PropsWithChildren,
 } from "react"
@@ -17,36 +18,28 @@ type Action = (state: State) => State
 type Context = {
   getState: () => State
   dispatch: (action: Action) => void
-  subscribe: (listener: () => void) => () => void
 }
 
 const StoreContext = createContext<Context>({} as Context)
 
-// We can also use a completely external store and remove almost everything from the context
-// And this is (almost) Zustand
-const createStore = (initialState: State) => {
-  let state = initialState
-  const listeners = new Set<() => void>()
-
-  return {
-    getState: () => state,
-    dispatch: (action: Action) => {
-      state = action(state)
-      // In this version, the dispatch itself notify the listeners
-      listeners.forEach((listener) => listener())
-    },
-    subscribe: (listener: () => void) => {
-      listeners.add(listener)
-      return () => listeners.delete(listener)
-    },
-  }
-}
-
-// Here the provider is a simple pipe
 const StoreProvider: React.FC<PropsWithChildren> = ({ children }) => {
-  const [store] = useState(() => createStore({ countA: 0, countB: 0 }))
+  const [state, setState] = useState<State>({
+    countA: 0,
+    countB: 0,
+  })
 
-  return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
+  const dispatch = useCallback(
+    (action: Action) => setState((prev) => action(prev)),
+    [],
+  )
+
+  const getState = useCallback(() => state, [state])
+
+  return (
+    <StoreContext.Provider value={{ dispatch, getState }}>
+      {children}
+    </StoreContext.Provider>
+  )
 }
 
 function useStore<T>(selector: (state: State) => T): T
@@ -54,45 +47,26 @@ function useStore(): Context
 function useStore<T>(selector?: (state: State) => T) {
   const store = useContext(StoreContext)
 
-  const [selected, setSelected] = useState(
-    selector ? selector(store.getState()) : store,
-  )
-
-  useEffect(() => {
-    if (!selector) return
-
-    const check = () => {
-      const next = selector(store.getState())
-      if (next !== selected) {
-        setSelected(next)
-      }
-    }
-
-    const unsubscribe = store.subscribe(check)
-
-    return unsubscribe
-  }, [store, selector, selected])
-
   if (!selector) {
     return store
   }
 
-  return selected
+  return selector(store.getState())
 }
 
-const CounterA: React.FC = () => {
+const CounterA: React.FC = memo(() => {
   const countA = useStore((state) => state.countA)
-  console.count("external store CounterA")
+  console.count("memo CounterA")
 
   return <div>Count A: {countA}</div>
-}
+})
 
-const CounterB: React.FC = () => {
+const CounterB: React.FC = memo(() => {
   const countB = useStore((state) => state.countB)
-  console.count("external store CounterB")
+  console.count("memo CounterB")
 
   return <div>Count B: {countB}</div>
-}
+})
 
 const Buttons: React.FC = () => {
   const { dispatch } = useStore()
@@ -141,7 +115,7 @@ const Buttons: React.FC = () => {
   )
 }
 
-export const CreateStore: React.FC = () => (
+export const Memoized: React.FC = () => (
   <StoreProvider>
     <CounterA />
     <CounterB />

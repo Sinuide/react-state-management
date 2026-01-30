@@ -15,6 +15,7 @@ import { Concurrent } from "./examples/issues/concurrent"
 import { Store } from "./examples/proposition/store"
 import { InitialHypothesis } from "./examples/proposition/store-without-fine-grained"
 import { CreateStore } from "./examples/proposition/create-store"
+import { Memoized } from "./examples/proposition/memo"
 
 import localCode from "./examples/states/local?raw"
 import derivedCode from "./examples/states/derived?raw"
@@ -29,6 +30,7 @@ import concurrentCode from "./examples/issues/concurrent?raw"
 import storeCode from "./examples/proposition/store?raw"
 import hypothesisCode from "./examples/proposition/store-without-fine-grained?raw"
 import createStoreCode from "./examples/proposition/create-store?raw"
+import memoCode from "./examples/proposition/memo?raw"
 
 const examples = {
   local: LocalState,
@@ -42,6 +44,7 @@ const examples = {
   "shared state": SharedStateIssue,
   concurrent: Concurrent,
   hypothesis: InitialHypothesis,
+  memo: Memoized,
   proposition: Store,
   "create store": CreateStore,
 }
@@ -58,6 +61,7 @@ const raws: Record<keyof typeof examples, string> = {
   "shared state": sharedStateCode,
   concurrent: concurrentCode,
   hypothesis: hypothesisCode,
+  memo: memoCode,
   proposition: storeCode,
   "create store": createStoreCode,
 }
