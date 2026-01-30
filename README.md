@@ -1,73 +1,73 @@
-# React + TypeScript + Vite
+# React State Management
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Mettre des exemples codes
 
-Currently, two official plugins are available:
+Hypothèse de solution : reducer (useReducer) -> store (useContext) -> selector
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Problèmes classiques :
 
-## React Compiler
+- re renders inutiles
+- props drilling
+- couplage composants
+- partage logique
+- partage etat
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+-> Stores (~context)
 
-## Expanding the ESLint configuration
+Les catégories états :
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- local (useState)
+- dérivé (useMemo)
+- partagé (useContext)
+- externe (useSyncExternalStore)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Ce que React attends :
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Immutabilité / Stabilité référentielle
+- Prévisibilité
+- Cohérence pendant le render (snapshot)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Concurrent rendering (React 18) aka React comme contrainte, pas comme feature :
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+ℹ️ Le but du concurrent rendering est de permettre à React d'interrompre, reporter, ou paralléliser des renders pour optimiser la réactivité de l'interface.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- concurrent rendering (React fibers)
+  -> time slicing (mécanisme central)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Conséquences du time slicing :
+-> interrupt render
+-> branch state
+-> tearing (temp/final)
+
+Concepts importants des stores :
+
+- unit testing
+- timewalking
+- fine grained
+
+Ephemere vs persistent -> Qui contrôle le cycle de vie de l'état ? (ownership, source of truth)
+
+- ephemere : controllé par l'arbre React -> ❤️ React 18
+- persistent : source externe (hors du contrôle du render de react) -> ⚠️ tearing
+
+-> synchronisation en arrière plan
+
+- storage -> store
+- ui -> store -> async storage
+- jamais storage -> ui -> storage
+
+-> store + adapter pour persistence
+
+L'objectif des stores n'est pas la persistence, mais de l'encapsuler dans un état éphémère.
+
+Solution finale : reducer (useReducer) -> store (useContext) -> subscribe (fine-grained ici !) -> selector
+
+Si context + selector suffisait, Zustand n'existerait pas.  
+Le vrai problème est la propagation des changements d'état, pas l'état lui même.
+
+https://github.com/dai-shi/will-this-react-global-state-work-in-concurrent-rendering
+
+Sources et inspirations :
+
+- https://blog.axlight.com/ -> zustand, jotai, valtio 🤯
+- https://blog.axlight.com/posts/why-use-sync-external-store-is-not-used-in-jotai/

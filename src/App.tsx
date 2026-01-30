@@ -1,34 +1,94 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from "react"
 
-function App() {
-  const [count, setCount] = useState(0)
+import { CodeBlock } from "./CodeBlock"
+
+import { LocalState } from "./examples/states/local"
+import { DerivedState } from "./examples/states/derived"
+import { SharedState } from "./examples/states/shared"
+import { ExternalState } from "./examples/states/external"
+import { Rerenders } from "./examples/issues/rerenders"
+import { PropsDrilling } from "./examples/issues/props-drilling"
+import { Coupling } from "./examples/issues/coupling"
+import { Logic } from "./examples/issues/logic"
+import { SharedState as SharedStateIssue } from "./examples/issues/shared-state"
+import { Concurrent } from "./examples/issues/concurrent"
+import { Store } from "./examples/proposition/store"
+import { InitialHypothesis } from "./examples/proposition/store-without-fine-grained"
+import { CreateStore } from "./examples/proposition/create-store"
+
+import localCode from "./examples/states/local?raw"
+import derivedCode from "./examples/states/derived?raw"
+import sharedCode from "./examples/states/shared?raw"
+import externalCode from "./examples/states/external?raw"
+import rerendersCode from "./examples/issues/rerenders?raw"
+import propsDrillingCode from "./examples/issues/props-drilling?raw"
+import couplingCode from "./examples/issues/coupling?raw"
+import logicCode from "./examples/issues/logic?raw"
+import sharedStateCode from "./examples/issues/shared-state?raw"
+import concurrentCode from "./examples/issues/concurrent?raw"
+import storeCode from "./examples/proposition/store?raw"
+import hypothesisCode from "./examples/proposition/store-without-fine-grained?raw"
+import createStoreCode from "./examples/proposition/create-store?raw"
+
+const examples = {
+  local: LocalState,
+  derived: DerivedState,
+  shared: SharedState,
+  external: ExternalState,
+  rerenders: Rerenders,
+  "props drilling": PropsDrilling,
+  coupling: Coupling,
+  logic: Logic,
+  "shared state": SharedStateIssue,
+  concurrent: Concurrent,
+  hypothesis: InitialHypothesis,
+  proposition: Store,
+  "create store": CreateStore,
+}
+
+const raws: Record<keyof typeof examples, string> = {
+  local: localCode,
+  derived: derivedCode,
+  shared: sharedCode,
+  external: externalCode,
+  rerenders: rerendersCode,
+  "props drilling": propsDrillingCode,
+  coupling: couplingCode,
+  logic: logicCode,
+  "shared state": sharedStateCode,
+  concurrent: concurrentCode,
+  hypothesis: hypothesisCode,
+  proposition: storeCode,
+  "create store": createStoreCode,
+}
+
+type Keys = keyof typeof examples
+
+const App: React.FC = () => {
+  const [example, setExample] = useState<Keys | undefined>()
+
+  const Component = example ? examples[example] : null
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="samples">
+      <div className="list">
+        {Object.keys(examples).map((key) => (
+          <div
+            className={`option ${example === key ? "active" : ""}`}
+            key={key}
+            onClick={() => setExample(key as Keys)}
+          >
+            {key}
+          </div>
+        ))}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      {Component && (
+        <div className="displayed">
+          <Component />
+        </div>
+      )}
+      {example && raws[example] && <CodeBlock code={raws[example]} />}
+    </div>
   )
 }
 
