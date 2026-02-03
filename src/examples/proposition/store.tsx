@@ -146,14 +146,14 @@ const Buttons: React.FC = () => {
         <div className="button-group">
           <button
             onClick={() =>
-              dispatch((state) => ({ ...state, countA: state.countB - 1 }))
+              dispatch((state) => ({ ...state, countB: state.countB - 1 }))
             }
           >
             Decrement
           </button>
           <button
             onClick={() =>
-              dispatch((state) => ({ ...state, countA: state.countB + 1 }))
+              dispatch((state) => ({ ...state, countB: state.countB + 1 }))
             }
           >
             Increment
