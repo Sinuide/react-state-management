@@ -30,7 +30,12 @@ Concurrent rendering (React 18) aka React comme contrainte, pas comme feature :
 ℹ️ Le but du concurrent rendering est de permettre à React d'interrompre, reporter, ou paralléliser des renders pour optimiser la réactivité de l'interface.
 
 - concurrent rendering (React fibers)
-  -> time slicing (mécanisme central)
+  -> Update
+  -> Split units of work
+  -> **Time slicing** (mécanisme central)
+  -> Suspense
+  -> Commit
+  -> Render
 
 Conséquences du time slicing :
 -> interrupt render
